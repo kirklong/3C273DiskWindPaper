@@ -75,7 +75,6 @@ function setup(i::Float64,n1::Int64,n2::Int64,r̄::Float64,rFac::Float64,γ::Flo
         rMesh, ϕMesh = meshgrid(r,ϕ)
         rMesh = reshape(rMesh,nr,nϕ); ϕMesh = reshape(ϕMesh,nr,nϕ)
         α,β = rMesh.*cos.(ϕMesh), rMesh.*sin.(ϕMesh)
-        #α,β = rMesh, ϕMesh
         Δϕ = ϕ[2]-ϕ[1]
         dA = zeros(size(rMesh))
         for i=1:size(dA)[1]
@@ -141,7 +140,7 @@ function getIntensity(r::Array{Float64,2},ϕ::Array{Float64,2},sini::Float64,cos
     return I,γ,A0,τ
 end
 
-function plotIntensity(α::Array{Float64,},β::Array{Float64,},I::Array{Float64,})
+function plotIntensity(α::Array{Float64,},β::Array{Float64,},I::Array{Float64,}) #visualize ray-traced disk
     p = scatter(α,β,markerz=I.^(1/4),label="",markersize=1.,markerstrokewidth=0.,aspect_ratio=:equal)
     return p
 end
@@ -151,8 +150,8 @@ function histSum(x::Array{Float64,},y::Array{Float64,};bins::Int=200,νMin::Floa
 end
 
 function phase(ν::Array{Float64,2},I::Array{Float64,2},dA::Array{Float64,2},x::Array{Float64,2},
-    y::Array{Float64,2},r::Array{Float64,2},U::Float64,V::Float64,rot::Float64,νMin::Float64,νMax::Float64,bins::Int=200) #make this -α?
-
+    y::Array{Float64,2},r::Array{Float64,2},U::Float64,V::Float64,rot::Float64,νMin::Float64,νMax::Float64,bins::Int=200)
+    #note that rot parameter here differs from standard PA convention by +90 deg
     rot = rot/180*π
     u′ = cos(rot)*U+sin(rot)*V; v′ = -sin(rot)*U+cos(rot)*V
     dϕMap = -2*π*(x.*u′.+y.*v′).*I.*180/π*1e6
