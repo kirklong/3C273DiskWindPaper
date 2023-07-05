@@ -1,5 +1,7 @@
 # 3C273DiskWindPaper
-Code and related files for Long+2023
+Code and related files for Long+2023 
+
+[![DOI](https://zenodo.org/badge/653265420.svg)](https://zenodo.org/badge/latestdoi/653265420)
 
 The model (lightly documented in the code, more robustly documented in the paper) is contained as the Julia module [`DiskWind`](DiskWind). A sample Python fitting script that uses the model is contained in [`PTemceeFit.py`](PTemceeFit.py) (which is run on HPC resources with [`run.py`](run.py)). The code uses a convention for position angle that is 90 degrees offset from the standard astronomy definition, such that the values obtained from fitting are 90 degrees higher than they should be, and fits the mass in terms of $3\times 10^8 M\odot$ to compare with the rough value previously determined for 3C 273. All of our fit results (chunked for job size purposes) using the model and this script are available as pickle files (`jPyPTEmceeVar*.p`).
 
