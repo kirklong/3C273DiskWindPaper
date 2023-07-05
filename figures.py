@@ -204,6 +204,25 @@ IData = data[3]
 x0 = np.array([0,0],dtype=int)
 centroids=[]; strLen = 0
 
+#fitting for data x,y
+def d_phase(params):
+    x,y,u,v,fline = params
+    return -2*np.pi*(u*x+v*y)*(fline/(1+fline))*180/np.pi*1e6 #rad -> deg, 1e6 from [u,v] = Mλ
+
+def wrap(x,args=np.zeros(4)):
+    params = [*x,*args[1:]]
+    ϕ = args[0]
+    return np.abs(d_phase(params)-ϕ)
+
+def wrap2(x,arg1,arg2,arg3,arg4):
+    params = [*x,arg2,arg3,arg4]
+    ϕ = arg1
+    return np.abs(d_phase(params)-ϕ)
+
+def f2d(params,x,y,ϕ):
+    params = [x,y,*params]
+    return np.abs(d_phase(params)-ϕ)
+
 def baselineFit(x,y,UData,VData,IData,ϕData,λi,onlyOn=True):
     z = 0
     indx=[0,1,2,6,7,8,12,13,14,18,19,20]
@@ -242,6 +261,7 @@ def IWrapper(params,data,nr=1024,nϕ=2048): #this is ~3x as fast as python versi
     return I,α,β,νloc,dA
 I,α,β,ν,dA = IWrapper(avgParams,data)
 
+mask = ((λData > 2.166) & (λData < 2.18))
 BLRAng = θBest[2]*3e8*2e33*6.67e-8/9e20/548/3.09e24
 fig,axs=plt.subplots(nrows=1,ncols=2,figsize=(20,8),facecolor="white")
 channelCenters = λData[mask]
@@ -264,7 +284,6 @@ for i in range(len(channelCenters)):
 rot = -(avgParams[-3])/180*np.pi
 
 xCD = np.array([centroid[0] for centroid in centroids]); yCD = np.array([centroid[1] for centroid in centroids])
-mask = ((λData > 2.166) & (λData < 2.18))
 conv = 206264806719 #rad to μas
 
 for i in range(2):
@@ -312,7 +331,7 @@ for i in range(2):
     ax.invert_xaxis()
     
     fig.colorbar(s, ax=ax,fraction=0.05,pad=0.,label="wavelength (μm)",spacing='proportional',ticks=bounds,boundaries=bounds)
-    title = "Data".format(i,fList[i-1]) if i>0 else "Model result"
+    title = "Data" if i>0 else "Model result"
     ax.set_title(title)
     ax.set_facecolor("white")
     ax.minorticks_on()
@@ -472,7 +491,7 @@ allResults = [np.concatenate((summit0[i],summit1[i],summit2[i],summit3[i],summit
 flat_samples,pos,prob,lhood,acor = allResults
 maxInd = np.argmax(lhood[0,:])
 θBest = flat_samples[0,maxInd,:] #prob matches with pos, NOT with flat_samples (idk why we have that one seems redundant to save both?)
-best_low_i = test[np.argmax(lhood[0,lowiMask]),:]
+best_low_i = flat_samples[0,lowiMask,:][np.argmax(lhood[0,lowiMask]),:]
 
 θList = flat_samples[0,np.random.randint(len(flat_samples[0]),size=100),:] #looks good!
 θList=np.vstack((θList,θBest))
