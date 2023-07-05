@@ -1,0 +1,12 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Long,
+    given-names: Kirk
+    orcid: https://orcid.org/0009-0003-8293-2185
+  - family-names: Dexter,
+    given-names: Jason
+
+title: kirklong/3C273DiskWindPaper: PaperV1.1
+version: paperv1.1
+date-released: 2023-07-05
