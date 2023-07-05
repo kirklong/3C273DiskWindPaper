@@ -20,11 +20,11 @@ def readPickle(file):
 
 def log_lhood(θ,data):
     ν,lineInterpY,phaseInterpList = DiskWind.getProfiles(θ,data)
-    yLErr = data[6]; #yPErr = x*0.0+0.07 #phase error wrong, should fit each individually
+    yLErr = data[6]; 
     indx=[0,1,2,6,7,8,12,13,14,18,19,20]; oindx=[3,4,5,9,10,11,15,16,17,21,22,23]
     lnLikeLine = -0.5*numpy.sum(((data[3]-lineInterpY)/yLErr)**2)
-    lnLikePhase = numpy.sum([-0.5*numpy.sum(((data[4][i] - phaseInterpList[i])/data[5][i,:])**2) for i in range(len(phaseInterpList))]) #so it's weighted equally, UPDATE don't do, because no differnce in χ2 when comparing avg vs individual profiles
-    return lnLikeLine + lnLikePhase #+ lnLikePhaseo
+    lnLikePhase = numpy.sum([-0.5*numpy.sum(((data[4][i] - phaseInterpList[i])/data[5][i,:])**2) for i in range(len(phaseInterpList))]) 
+    return lnLikeLine + lnLikePhase 
 
 def log_prior(θ):
     i,rBar,Mfac,rFac,f1,f2,f3,f4,pa,scale,cenShift = θ
@@ -42,7 +42,6 @@ def log_prob(θ,data):
 
 def MC(nWalkers,nTemps,θ0,p0,log_prob,data,threads,burn=100,iter=100,restart=False):
     print("initializing sampler")
-    #sampler = emcee.EnsembleSampler(nWalkers,len(θ0),log_prob,args=[data],pool=pool)
     sampler = ptemcee.sampler.Sampler(nWalkers,len(θ0),log_lhood,log_prior,ntemps=nTemps,loglargs=[data],threads=threads)
     if restart == False:
         print("running burn-in")
@@ -71,15 +70,15 @@ def main(specifyThreads = False, save = True, burn=100,iter=3000, restart=False)
     for n in range(len(pert)):
         p0[:,:,n] = numpy.array([θ0[n]+pert[n]*numpy.random.randn(1) for j in range(nWalkers*nTemps)]).reshape(nTemps,nWalkers)
     sampler,pos,prob,state = MC(nWalkers,nTemps,θ0,p0,log_prob,data,threads,burn,iter,restart)
-    flat_samples = sampler.flatchain#(flat=True)
+    flat_samples = sampler.flatchain
     prob = sampler.logprobability #this is the prob for everyone
     lhood = sampler.loglikelihood
     prob = prob.reshape(*prob.shape[:1],-1) #collapse along walker axis so it's same shape as flat_chain
     lhood = prob.reshape(*prob.shape[:1],-1) #collapse along walker axis so it's same shape as flat_chain
     acor = sampler.acor #autocorrelation
-    if save == True: #ie on summitsaml
+    if save == True: #ie on summit
         with open("jPyPTEmceeVar.p","wb") as f:
-            obj = [flat_samples,pos,prob,lhood,acor] #really only care about flat_samples, don't think we need sampler/state
+            obj = [flat_samples,pos,prob,lhood,acor] #really only care about flat_samples, but keep others for bookkeeping
             pickle.dump(obj,f)
     else: #ie for interactive nb
         return sampler,pos,prob,state,flat_samples
